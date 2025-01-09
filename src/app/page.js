@@ -1,0 +1,490 @@
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { SiPython, SiOracle, SiPhp, SiHtml5, SiCss3, SiDotnet, SiMysql, SiFirebase, SiGit, SiTensorflow } from "react-icons/si";
+
+import { 
+  ChevronRight, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Github, 
+  Linkedin, 
+  Download,
+  Code,
+  ExternalLink,
+  ZoomIn
+} from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const portfolioData = {
+  name: "Angelo David Brioso Castuera",
+  personalInfo: {
+    email: "angelodavidcastuera@gmail.com",
+    phone: "09563457370",
+    location: "Zone 4, Balinad, Polangui, Albay",
+  },
+  skills: [
+    "Python",
+    "Java",
+    "PHP",
+    "HTML",
+    "CSS",
+    ".NET",
+    "MySQL",
+    "Git",
+    "Firebase",
+    "Machine Learning",
+    "CNN",
+  ],
+  experience: [
+    {
+      title: "TESDA SIL - Software Developer Intern",
+      company: "NRG Info-Tech Institute INC.",
+      period: "2024",
+      location: "Ligao City, Albay",
+      responsibilities: [
+        "Built School Timetable System using Java",
+        "Utilized development tools such as Netbeans IDE, XAMPP, Git, and MySQL",
+      ],
+    },
+    {
+      title: "Backend Developer Intern",
+      company: "Pixel Web Solutions & Consultancy Inc.",
+      period: "2023",
+      location: "Legazpi City, Albay",
+      responsibilities: [
+        "Built Restful APIs written with PHP as Backend",
+        "Utilized development tools such as HTML, PHP, MySQL, Insomnia, XAMPP, Git, and Gitlab",
+      ],
+    },
+  ],
+  projects: [
+    {
+      title: "CUENTA: CNN Approach for Real-Time Bus Passenger Counting",
+      description: "A Convolutional Neural Network-based system for real-time bus passenger counting using CCTV, DVR, and Raspberry Pi 4b.",
+      technologies: ["Python", "YOLOv8", "Firebase", "HTML", "CSS", "Google Colab", "Roboflow", "Git"],
+      highlights: [
+        "Developed a functional CNN-based real-time passenger counting system.",
+        "Integrated bus passenger counting through CCTVs, DVRs, and Raspberry Pi 4b.",
+        "Designed and implemented an accurate passenger counting system.",
+        "Successfully deployed the system in a real-world environment.",
+      ],
+      images: ["/assets/cuenta1.png", "/assets/cuenta2.png", "/assets/cuenta3.png"],
+    },
+    {
+      title: "Student Information System",
+      description: "A comprehensive student information management system built with .NET.",
+      technologies: [".NET", "Microsoft Access", "Visual Studio"],
+      highlights: [
+        "Developed a functional Student Information System with .NET.",
+        "Implemented both frontend and backend functionality.",
+        "Created a robust database system using Microsoft Access.",
+      ],
+      images: ["/assets/sis1.png", "/assets/sis2.jpg", "/assets/sis3.jpg"],
+    },
+  ],
+
+  certificates: [
+    "/certificates/infinitech.png",
+    "/certificates/javascript_essentials1.png",
+    "/certificates/ubws.png",
+    
+  ],
+
+};
+
+const skillIcons = {
+  Python: <SiPython size={24} className="text-blue-300" />,
+  Java: <SiOracle size={24} className="text-blue-300" />,
+  PHP: <SiPhp size={24} className="text-blue-300" />,
+  HTML: <SiHtml5 size={24} className="text-blue-300" />,
+  CSS: <SiCss3 size={24} className="text-blue-300" />,
+  ".NET": <SiDotnet size={24} className="text-blue-300" />,
+  MySQL: <SiMysql size={24} className="text-blue-300" />,
+  Firebase: <SiFirebase size={24} className="text-blue-300" />,
+  Git: <SiGit size={24} className="text-blue-300" />,
+  "Machine Learning": <SiTensorflow size={24} className="text-blue-300" />,
+  CNN: <SiTensorflow size={24} className="text-blue-300" />, // Reuse TensorFlow for CNN
+};
+
+const frameworkIcons = {
+  Python: <SiPython size={24} className="text-blue-300" />, 
+  YOLOv8: <SiTensorflow size={24} className="text-blue-300" />, // Using TensorFlow for YOLOv8
+  Firebase: <SiFirebase size={24} className="text-blue-300" />,
+  HTML: <SiHtml5 size={24} className="text-blue-300" />,
+  CSS: <SiCss3 size={24} className="text-blue-300" />,
+  "Google Colab": <SiPython size={24} className="text-blue-300" />, // Using Python icon for Google Colab
+  Roboflow: <SiPython size={24} className="text-blue-300" />, // Placeholder icon
+  Git: <SiGit size={24} className="text-blue-300" />,
+  ".NET": <SiDotnet size={24} className="text-blue-300" />,
+  "Microsoft Access": <SiMysql size={24} className="text-blue-300" />, // Using MySQL icon as placeholder
+  "Visual Studio": <SiDotnet size={24} className="text-blue-300" /> // Using .NET icon for Visual Studio
+};
+
+const NavLink = ({ href, children }) => (
+  <a
+    href={href}
+    className="text-white hover:text-blue-300 transition-colors duration-300 relative 
+              after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-300 
+              after:left-0 after:-bottom-1 after:scale-x-0 hover:after:scale-x-100 
+              after:transition-transform after:duration-300"
+  >
+    {children}
+  </a>
+);
+
+const Section = ({ id, title, children, bgColor = "bg-blue-800" }) => (
+  <section 
+    id={id} 
+    className={`py-16 ${bgColor} scroll-mt-16 relative overflow-hidden`}
+  >
+    <div className="max-w-6xl mx-auto px-4 relative">
+      {title && (
+        <h2 className="text-4xl font-bold text-white mb-12 relative inline-block">
+          {title}
+        </h2>
+      )}
+      {children}
+    </div>
+  </section>
+);
+
+const AutoScrollImages = ({ images }) => {
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+
+    const startScrolling = () => {
+      let scrollAmount = 0;
+      const scrollStep = 1; // Pixels to scroll per step
+      const scrollInterval = 20; // Interval in milliseconds
+
+      const scroll = setInterval(() => {
+        if (scrollContainer) {
+          scrollAmount += scrollStep;
+          scrollContainer.scrollLeft = scrollAmount;
+
+          // Reset scroll when reaching the end
+          if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+            scrollAmount = 0;
+          }
+        }
+      }, scrollInterval);
+
+      return () => clearInterval(scroll);
+    };
+
+    const stopScrolling = startScrolling();
+    return stopScrolling;
+  }, []);
+
+  return (
+    <div
+      ref={scrollContainerRef}
+      className="flex overflow-x-scroll scrollbar-hide h-48"
+    >
+      {images.map((image, idx) => (
+        <img
+          key={idx}
+          src={image}
+          alt={`Project Screenshot ${idx + 1}`}
+          className="h-full w-auto flex-shrink-0"
+        />
+      ))}
+    </div>
+  );
+};
+
+const Portfolio = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const link = document.createElement("a");
+      link.href = "/assets/Angelo_David_Castuera_Resume.pdf";
+      link.download = "Angelo_David_Castuera_Resume.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error downloading resume:", error);
+    }
+    setIsDownloading(false);
+  };
+
+  return (
+    <div className="relative min-h-screen">   
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-950">   
+      <div className="absolute inset-0 backdrop-blur-[150px]" />           
+      <div className="absolute inset-0 bg-blue-900/10" />    
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-800/10 to-transparent animate-pulse" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-700/20 rounded-full blur-3xl animate-float opacity-50" />
+      <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-float-delayed opacity-50" />
+      <div className="absolute bottom-1/4 left-1/2 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-float-slow opacity-40" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,58,138,0.1),transparent_70%)]" />
+    </div>
+
+    <div className="relative z-10">
+      <nav className={`fixed w-full transition-all duration-300 z-50 ${
+        isScrolled ? "bg-blue-950/50 backdrop-blur-lg shadow-lg" : "bg-blue-900/30 backdrop-blur-md"
+      }`}>
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <span className="font-bold text-xl text-white">AC</span>
+              <div className="flex gap-8">
+                <NavLink href="#about">About</NavLink>
+                <NavLink href="#projects">Projects</NavLink>
+                <NavLink href="#experience">Experience</NavLink>
+                <NavLink href="#trainings">Trainings</NavLink>
+                <NavLink href="#contact">Contact</NavLink>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        {/* About Section */}
+        <Section id="about" bgColor="bg-blue-950/20">
+          <div className="min-h-screen flex flex-col items-center justify-center text-white space-y-6">
+            <div className="relative">
+              <img
+                src="assets/mypicture.png"
+                alt={portfolioData.name}
+                className="w-48 h-48 object-cover rounded-full border-4 border-blue-300 shadow-xl"
+              />
+            </div>
+
+            <div className="w-full text-center px-4">
+              <h1 className="text-8xl font-bold bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent">
+                {portfolioData.name}
+              </h1>
+            </div>
+
+            <p className="italic text-blue-200 text-center">
+              "Strive not to be a success, but rather to be of value." – Albert Einstein
+            </p>
+
+            <p className="text-blue-50 text-center max-w-2xl">
+              Passionate software developer skilled in Python, .NET, and machine learning, driven to create impactful solutions and continually learn new technologies.
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="inline-flex items-center gap-2 bg-blue-400 text-white px-6 py-3 rounded-lg 
+                         hover:bg-blue-300 transition-all duration-300 shadow-lg hover:shadow-blue-400/50"
+              >
+                <Download size={20} />
+                {isDownloading ? "Downloading..." : "Download Resume"}
+              </button>
+              <button
+                onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 bg-blue-300 text-blue-900 px-6 py-3 rounded-lg 
+                         hover:bg-blue-200 transition-all duration-300 shadow-lg hover:shadow-blue-300/50"
+              >
+                <MapPin size={20} />
+                Contact Me
+              </button>
+            </div>
+          </div>
+        </Section>
+
+        {/* Skills Section */}
+        <Section id="skills" title="Skills & Technologies" bgColor="bg-blue-900/20">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {portfolioData.skills.map((skill, index) => (
+              <div 
+                key={index} 
+                className="bg-white/10 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl 
+                         transition-all duration-300 hover:bg-white/20 hover:-translate-y-1 
+                         flex items-center gap-3 border border-white/20"
+              >
+                {skillIcons[skill] || null}
+                <span className="text-white">{skill}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section id="projects" title="Featured Projects" bgColor="bg-blue-950/20">
+          <div className="grid md:grid-cols-2 gap-8">
+            {portfolioData.projects.map((project, index) => (
+              <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
+                                         overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-2xl font-bold text-white">{project.title}</h3>
+                  <p className="text-blue-50">{project.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.technologies.map((tech, idx) => (
+                      <div key={idx} className="flex items-center gap-2 bg-blue-600/30 px-3 py-2 
+                                              rounded-full text-blue-100">
+                        {frameworkIcons[tech] || null}
+                        <span>{tech}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <ul className="space-y-2">
+                    {project.highlights.map((highlight, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
+                        <p className="text-blue-50">{highlight}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <AutoScrollImages images={project.images} />
+              </Card>
+            ))}
+          </div>
+        </Section>
+
+        {/* Experience Section */}
+       
+        <Section id="experience" title="Work Experience" bgColor="bg-blue-900/20">
+          <div className="space-y-8">
+            {portfolioData.experience.map((job, index) => (
+              <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
+                                         overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="text-2xl font-bold text-white">{job.title}</h3>
+                  <p className="text-blue-100 font-semibold">{job.company}</p>
+                  <p className="text-blue-200 text-sm">{job.period} • {job.location}</p>
+                  <ul className="space-y-2">
+                    {job.responsibilities.map((responsibility, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
+                        <p className="text-blue-50">{responsibility}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </Section>
+
+        {/* New Trainings Section */}
+        <Section id="trainings" title="Trainings & Certifications" bgColor="bg-blue-900/20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {portfolioData.certificates.map((certificate, index) => (
+              <div 
+                key={index}
+                className="group relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg cursor-pointer 
+                         hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                onClick={() => setSelectedImage(certificate)}
+              >
+                <img
+                  src={certificate}
+                  alt={`Certificate ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-300 
+                           group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 
+                              transition-all duration-300 flex items-center justify-center">
+                  <ZoomIn 
+                    className="text-white opacity-0 group-hover:opacity-100 transition-opacity 
+                              duration-300" 
+                    size={32}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* Image Modal */}
+        {selectedImage && (
+          <div 
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div className="relative max-w-4xl w-full">
+              <img
+                src={selectedImage}
+                alt="Certificate"
+                className="w-full h-auto rounded-lg"
+              />
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute -top-12 right-0 text-white hover:text-blue-300 
+                         transition-colors duration-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Contact Section */}
+        <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
+          <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
+            <CardContent className="p-8 space-y-8">
+              <p className="text-xl text-center text-white">
+                Feel free to reach out to me via email, phone, or connect on my social platforms!
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a
+                  href={`mailto:${portfolioData.personalInfo.email}`}
+                  className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors 
+                           p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50"
+                >
+                  <Mail size={24} />
+                  <span className="text-sm break-all">{portfolioData.personalInfo.email}</span>
+                </a>
+                
+                <a
+                  href={`tel:${portfolioData.personalInfo.phone}`}
+                  className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors 
+                           p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50"
+                >
+                  <Phone size={24} />
+                  <span>{portfolioData.personalInfo.phone}</span>
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <a
+                  href="https://github.com/Angelo12345678900"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
+                           transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50"
+                >
+                  <Github size={24} />
+                  GitHub
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/angelo-david-castuera-804300278/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
+                           transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50"
+                >
+                  <Linkedin size={24} />
+                  LinkedIn
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        </Section>
+      </div>
+    </div>
+  );
+};
+
+export default Portfolio;
