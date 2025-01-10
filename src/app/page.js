@@ -1,24 +1,47 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { SiPython, SiOracle, SiPhp, SiHtml5, SiCss3, SiDotnet, SiMysql, SiFirebase, SiGit, SiTensorflow } from "react-icons/si";
+
+import {
+  SiPython,
+  SiPhp,
+  SiHtml5,
+  SiCss3,
+  SiDotnet,
+  SiMysql,
+  SiFirebase,
+  SiGit,
+  SiGooglecolab,
+  SiJavascript
+} from "react-icons/si";
+
+import {
+  DiJava,
+  DiVisualstudio
+} from "react-icons/di";
+
+import {
+  TbBrain,
+  TbBrandPython,
+  TbNetwork,
+  TbEye
+} from "react-icons/tb";
+
+import { FaMicrosoft } from "react-icons/fa";
 
 import { 
-  ChevronRight, 
+  
   Mail, 
   Phone, 
   MapPin, 
   Github, 
   Linkedin, 
   Download,
-  Code,
-  ExternalLink,
   ZoomIn,
   Menu,
   X
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 const portfolioData = {
   name: "Angelo David Brioso Castuera",
@@ -32,18 +55,20 @@ const portfolioData = {
     "Java",
     "PHP",
     "HTML",
-    "CSS",
+    "JavaScript",
     ".NET",
     "MySQL",
     "Git",
     "Firebase",
+    "YOLOv8",
     "Machine Learning",
-    "CNN",
+    "CNN"
   ],
+
   experience: [
     {
       title: "TESDA SIL - Software Developer Intern",
-      company: "NRG Info-Tech Institute INC.",
+      company: "NRG Info-Tech Institute INC. - Infinitech Advertising Corporation",
       period: "2024",
       location: "Ligao City, Albay",
       responsibilities: [
@@ -53,7 +78,7 @@ const portfolioData = {
     },
     {
       title: "Backend Developer Intern",
-      company: "Pixel Web Solutions & Consultancy Inc.",
+      company: "Pixel8 Web Solutions & Consultancy Inc.",
       period: "2023",
       location: "Legazpi City, Albay",
       responsibilities: [
@@ -66,7 +91,7 @@ const portfolioData = {
     {
       title: "CUENTA: CNN Approach for Real-Time Bus Passenger Counting",
       description: "A Convolutional Neural Network-based system for real-time bus passenger counting using CCTV, DVR, and Raspberry Pi 4b.",
-      technologies: ["Python", "YOLOv8", "Firebase", "HTML", "CSS", "Google Colab", "Roboflow", "Git"],
+      technologies: ["Python", "YOLOv8", "Firebase", "HTML", "CSS", "JavaScript", "Google Colab", "Roboflow", "Git"],
       highlights: [
         "Developed a functional CNN-based real-time passenger counting system.",
         "Integrated bus passenger counting through CCTVs, DVRs, and Raspberry Pi 4b.",
@@ -97,9 +122,10 @@ const portfolioData = {
 
 };
 
+
 const skillIcons = {
   Python: <SiPython size={24} className="text-blue-300" />,
-  Java: <SiOracle size={24} className="text-blue-300" />,
+  Java: <DiJava size={24} className="text-blue-300" />,
   PHP: <SiPhp size={24} className="text-blue-300" />,
   HTML: <SiHtml5 size={24} className="text-blue-300" />,
   CSS: <SiCss3 size={24} className="text-blue-300" />,
@@ -107,23 +133,27 @@ const skillIcons = {
   MySQL: <SiMysql size={24} className="text-blue-300" />,
   Firebase: <SiFirebase size={24} className="text-blue-300" />,
   Git: <SiGit size={24} className="text-blue-300" />,
-  "Machine Learning": <SiTensorflow size={24} className="text-blue-300" />,
-  CNN: <SiTensorflow size={24} className="text-blue-300" />, // Reuse TensorFlow for CNN
+  "Machine Learning": <TbBrain size={24} className="text-blue-300" />,
+  CNN: <TbNetwork size={24} className="text-blue-300" />,
+  YOLOv8: <TbEye size={24} className="text-blue-300" />,
+  JavaScript: <SiJavascript size={24} className="text-blue-300" />
 };
 
 const frameworkIcons = {
-  Python: <SiPython size={24} className="text-blue-300" />, 
-  YOLOv8: <SiTensorflow size={24} className="text-blue-300" />, // Using TensorFlow for YOLOv8
+  Python: <TbBrandPython size={24} className="text-blue-300" />,
+  YOLOv8: <TbEye size={24} className="text-blue-300" />,
   Firebase: <SiFirebase size={24} className="text-blue-300" />,
   HTML: <SiHtml5 size={24} className="text-blue-300" />,
   CSS: <SiCss3 size={24} className="text-blue-300" />,
-  "Google Colab": <SiPython size={24} className="text-blue-300" />, // Using Python icon for Google Colab
-  Roboflow: <SiPython size={24} className="text-blue-300" />, // Placeholder icon
+  "Google Colab": <SiGooglecolab size={24} className="text-blue-300" />,
+  Roboflow: <TbBrain size={24} className="text-blue-300" />,
   Git: <SiGit size={24} className="text-blue-300" />,
   ".NET": <SiDotnet size={24} className="text-blue-300" />,
-  "Microsoft Access": <SiMysql size={24} className="text-blue-300" />, // Using MySQL icon as placeholder
-  "Visual Studio": <SiDotnet size={24} className="text-blue-300" /> // Using .NET icon for Visual Studio
+  "Microsoft Access": <FaMicrosoft size={24} className="text-blue-300" />,
+  "Visual Studio": <DiVisualstudio size={24} className="text-blue-300" />,
+  JavaScript: <SiJavascript size={24} className="text-blue-300" />
 };
+
 
 const NavLink = ({ href, children, onClick }) => (
   <a
@@ -186,15 +216,15 @@ const AutoScrollImages = ({ images }) => {
 
     const startScrolling = () => {
       let scrollAmount = 0;
-      const scrollStep = 1; // Pixels to scroll per step
-      const scrollInterval = 20; // Interval in milliseconds
+      const scrollStep = 1; 
+      const scrollInterval = 20; 
 
       const scroll = setInterval(() => {
         if (scrollContainer) {
           scrollAmount += scrollStep;
           scrollContainer.scrollLeft = scrollAmount;
 
-          // Reset scroll when reaching the end
+          
           if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
             scrollAmount = 0;
           }
@@ -460,8 +490,9 @@ const Portfolio = () => {
             ))}
           </div>
         </Section>
-{/* Contact Section */}
-<Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
+
+        {/* Contact Section */}
+        <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
           <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
             <CardContent className="p-4 md:p-8 space-y-8">
               <p className="text-lg md:text-xl text-center text-white">
@@ -473,9 +504,9 @@ const Portfolio = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <a
                     href={`mailto:${portfolioData.personalInfo.email}`}
-                    className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors 
-                             p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base
-                             break-all"
+                    className="flex items-center justify-center gap-3 text-blue-100 hover:text-white transition-colors 
+                            p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base
+                            break-all text-center"
                   >
                     <Mail size={24} />
                     <span>{portfolioData.personalInfo.email}</span>
@@ -483,8 +514,9 @@ const Portfolio = () => {
                   
                   <a
                     href={`tel:${portfolioData.personalInfo.phone}`}
-                    className="flex items-center gap-3 text-blue-100 hover:text-white transition-colors 
-                             p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base"
+                    className="flex items-center justify-center gap-3 text-blue-100 hover:text-white transition-colors 
+                            p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base
+                            text-center"
                   >
                     <Phone size={24} />
                     <span>{portfolioData.personalInfo.phone}</span>
@@ -498,8 +530,8 @@ const Portfolio = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
-                             transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                             text-sm md:text-base"
+                            transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base"
                   >
                     <Github size={24} />
                     <span className="hidden md:inline">GitHub</span>
@@ -509,8 +541,8 @@ const Portfolio = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
-                             transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                             text-sm md:text-base"
+                            transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base"
                   >
                     <Linkedin size={24} />
                     <span className="hidden md:inline">LinkedIn</span>
