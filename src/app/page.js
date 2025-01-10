@@ -506,37 +506,29 @@ const Portfolio = () => {
       </p>
       
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <a
-            href={`mailto:${portfolioData.personalInfo.email}`}
-            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                    transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-                    text-sm md:text-base group"
-            title="Send me an email"
-          >
-            <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">Email</span>
-          </a>
-          
-          <button
-            onClick={handlePhoneClick}
-            className="relative flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                    transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-                    text-sm md:text-base group"
-            title="View phone number"
-          >
-            <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">
-              Phone
-            </span>
-            {showPhoneNumber && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 
-                           bg-blue-900 text-white rounded shadow-lg text-sm whitespace-nowrap">
-                {portfolioData.personalInfo.phone}
-              </div>
-            )}
-          </button>
-        </div>
+      <div className="grid grid-cols-2 gap-4">
+  <a
+    href={`mailto:${portfolioData.personalInfo.email}`}
+    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+            text-sm md:text-base group"
+    title="Send me an email"
+  >
+    <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
+    <span className="text-sm">Email</span>
+  </a>
+  
+  <a
+    href={`tel:${portfolioData.personalInfo.phone}`}
+    className="relative flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+            text-sm md:text-base group"
+    title="Call me"
+  >
+    <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
+    <span className="text-sm">Phone</span>
+  </a>
+</div>
 
         <div className="grid grid-cols-2 gap-4">
           <a
