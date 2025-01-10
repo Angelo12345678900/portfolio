@@ -260,6 +260,7 @@ const Portfolio = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showPhoneNumber, setShowPhoneNumber] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -294,6 +295,11 @@ const Portfolio = () => {
       console.error("Error downloading resume:", error);
     }
     setIsDownloading(false);
+  };
+
+  const handlePhoneClick = (e) => {
+    e.preventDefault();
+    setShowPhoneNumber(!showPhoneNumber);
   };
 
   return (
@@ -491,61 +497,63 @@ const Portfolio = () => {
           </div>
         </Section>
 
-        {/* Contact Section */}
-        <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
+       {/* Contact Section */}
+       <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
           <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
             <CardContent className="p-4 md:p-8 space-y-8">
               <p className="text-lg md:text-xl text-center text-white">
-                Feel free to reach out to me via email, phone, or connect on my social platforms!
+                Feel free to reach out to me through my contact channels or social platforms!
               </p>
               
               <div className="space-y-4">
-                {/* Email and Phone in same row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <a
                     href={`mailto:${portfolioData.personalInfo.email}`}
-                    className="flex items-center justify-center gap-3 text-blue-100 hover:text-white transition-colors 
-                            p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base
-                            break-all text-center"
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base group"
+                    title="Send me an email"
                   >
-                    <Mail size={24} />
-                    <span>{portfolioData.personalInfo.email}</span>
+                    <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">Email</span>
                   </a>
                   
-                  <a
-                    href={`tel:${portfolioData.personalInfo.phone}`}
-                    className="flex items-center justify-center gap-3 text-blue-100 hover:text-white transition-colors 
-                            p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50 text-sm md:text-base
-                            text-center"
+                  <button
+                    onClick={handlePhoneClick}
+                    className="relative flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base group"
+                    title="View phone number"
                   >
-                    <Phone size={24} />
-                    <span>{portfolioData.personalInfo.phone}</span>
-                  </a>
+                    <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">
+                      {showPhoneNumber ? portfolioData.personalInfo.phone : "Phone"}
+                    </span>
+                  </button>
                 </div>
 
-                {/* Social Links */}
                 <div className="grid grid-cols-2 gap-4">
                   <a
                     href="https://github.com/Angelo12345678900"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
                             transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                            text-sm md:text-base"
+                            text-sm md:text-base group"
                   >
-                    <Github size={24} />
-                    <span className="hidden md:inline">GitHub</span>
+                    <Github size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">GitHub</span>
                   </a>
                   <a
                     href="https://www.linkedin.com/in/angelo-david-castuera-804300278/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 text-blue-100 hover:text-white 
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
                             transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                            text-sm md:text-base"
+                            text-sm md:text-base group"
                   >
-                    <Linkedin size={24} />
-                    <span className="hidden md:inline">LinkedIn</span>
+                    <Linkedin size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">LinkedIn</span>
                   </a>
                 </div>
               </div>
