@@ -260,7 +260,9 @@ const Portfolio = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -498,7 +500,7 @@ const Portfolio = () => {
         </Section>
 
        {/* Contact Section */}
-<Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
+       <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
   <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
     <CardContent className="p-4 md:p-8 space-y-8">
       <p className="text-lg md:text-xl text-center text-white">
@@ -506,29 +508,53 @@ const Portfolio = () => {
       </p>
       
       <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-  <a
-    href={`mailto:${portfolioData.personalInfo.email}`}
-    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-            text-sm md:text-base group"
-    title="Send me an email"
-  >
-    <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
-    <span className="text-sm">Email</span>
-  </a>
-  
-  <a
-    href={`tel:${portfolioData.personalInfo.phone}`}
-    className="relative flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-            transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-            text-sm md:text-base group"
-    title="Call me"
-  >
-    <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
-    <span className="text-sm">Phone</span>
-  </a>
-</div>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Email */}
+          <button
+            onClick={() => {
+              setShowPhoneNumber(false); // Hide phone number if visible
+              setShowEmail((prev) => !prev); // Toggle email visibility
+              if (!showEmail) {
+                navigator.clipboard.writeText(portfolioData.personalInfo.email);
+              }
+            }}
+            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                      transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                      text-sm md:text-base group"
+            title="Email"
+          >
+            <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
+            <span className="text-sm">
+              {showEmail ? portfolioData.personalInfo.email : "Email"}
+            </span>
+            {showEmail && (
+              <span className="text-xs text-blue-300">Copied to clipboard</span>
+            )}
+          </button>
+          
+          {/* Phone */}
+          <button
+            onClick={() => {
+              setShowEmail(false); // Hide email if visible
+              setShowPhoneNumber((prev) => !prev); // Toggle phone visibility
+              if (!showPhoneNumber) {
+                navigator.clipboard.writeText(portfolioData.personalInfo.phone);
+              }
+            }}
+            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                      transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                      text-sm md:text-base group"
+            title="Phone Number"
+          >
+            <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
+            <span className="text-sm">
+              {showPhoneNumber ? portfolioData.personalInfo.phone : "Phone"}
+            </span>
+            {showPhoneNumber && (
+              <span className="text-xs text-blue-300">Copied to clipboard</span>
+            )}
+          </button>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <a
@@ -558,6 +584,7 @@ const Portfolio = () => {
     </CardContent>
   </Card>
 </Section>
+
 
         {/* Image Modal */}
         {selectedImage && (
