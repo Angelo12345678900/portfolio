@@ -524,7 +524,11 @@ const Portfolio = () => {
             title="Email"
           >
             <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">
+            <span 
+              className={`text-sm ${
+                showEmail ? "break-words text-center px-2" : ""
+              }`}
+            >
               {showEmail ? portfolioData.personalInfo.email : "Email"}
             </span>
             {showEmail && (
@@ -547,7 +551,11 @@ const Portfolio = () => {
             title="Phone Number"
           >
             <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">
+            <span 
+              className={`text-sm ${
+                showPhoneNumber ? "break-words text-center px-2" : ""
+              }`}
+            >
               {showPhoneNumber ? portfolioData.personalInfo.phone : "Phone"}
             </span>
             {showPhoneNumber && (
