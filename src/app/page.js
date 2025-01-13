@@ -47,7 +47,7 @@ const portfolioData = {
   name: "Angelo David Brioso Castuera",
   personalInfo: {
     email: "angelodavidcastuera@gmail.com",
-    phone: "09563457370",
+    phone: "(+63) 9169907440",
     location: "Zone 4, Balinad, Polangui, Albay",
   },
   skills: [
