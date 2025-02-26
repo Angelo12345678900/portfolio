@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
 // Dynamically import icons to reduce initial bundle size
-const IconsModule = dynamic(() => import('./components/Icons'), { 
+const IconsModule = dynamic(() => import('@/components/ui/Icons'), { 
   ssr: false,
   loading: () => <div className="w-6 h-6 bg-blue-300/20 animate-pulse rounded-full" />
 });
