@@ -1,35 +1,15 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo, useMemo } from "react";
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
-import {
-  SiPython,
-  SiPhp,
-  SiHtml5,
-  SiCss3,
-  SiDotnet,
-  SiMysql,
-  SiFirebase,
-  SiGit,
-  SiGooglecolab,
-  SiJavascript
-} from "react-icons/si";
-
-import {
-  DiJava,
-  DiVisualstudio
-} from "react-icons/di";
-
-import {
-  TbBrain,
-  TbBrandPython,
-  TbNetwork,
-  TbEye
-} from "react-icons/tb";
-
-import { FaMicrosoft } from "react-icons/fa";
+// Dynamically import icons to reduce initial bundle size
+const IconsModule = dynamic(() => import('./components/Icons'), { 
+  ssr: false,
+  loading: () => <div className="w-6 h-6 bg-blue-300/20 animate-pulse rounded-full" />
+});
 
 import { 
-  
   Mail, 
   Phone, 
   MapPin, 
@@ -43,6 +23,7 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 
+// Move data outside component to prevent re-creation on each render
 const portfolioData = {
   name: "Angelo David Brioso Castuera",
   personalInfo: {
@@ -64,7 +45,6 @@ const portfolioData = {
     "Machine Learning",
     "CNN"
   ],
-
   experience: [
     {
       title: "TESDA SIL - Software Developer Intern",
@@ -112,50 +92,15 @@ const portfolioData = {
       images: ["/assets/sis1.png", "/assets/sis2.jpg", "/assets/sis3.jpg"],
     },
   ],
-
   certificates: [
     "/certificates/infinitech.png",
     "/certificates/javascript_essentials1.png",
     "/certificates/ubws.png",
-    
   ],
-
 };
 
-
-const skillIcons = {
-  Python: <SiPython size={24} className="text-blue-300" />,
-  Java: <DiJava size={24} className="text-blue-300" />,
-  PHP: <SiPhp size={24} className="text-blue-300" />,
-  HTML: <SiHtml5 size={24} className="text-blue-300" />,
-  CSS: <SiCss3 size={24} className="text-blue-300" />,
-  ".NET": <SiDotnet size={24} className="text-blue-300" />,
-  MySQL: <SiMysql size={24} className="text-blue-300" />,
-  Firebase: <SiFirebase size={24} className="text-blue-300" />,
-  Git: <SiGit size={24} className="text-blue-300" />,
-  "Machine Learning": <TbBrain size={24} className="text-blue-300" />,
-  CNN: <TbNetwork size={24} className="text-blue-300" />,
-  YOLOv8: <TbEye size={24} className="text-blue-300" />,
-  JavaScript: <SiJavascript size={24} className="text-blue-300" />
-};
-
-const frameworkIcons = {
-  Python: <TbBrandPython size={24} className="text-blue-300" />,
-  YOLOv8: <TbEye size={24} className="text-blue-300" />,
-  Firebase: <SiFirebase size={24} className="text-blue-300" />,
-  HTML: <SiHtml5 size={24} className="text-blue-300" />,
-  CSS: <SiCss3 size={24} className="text-blue-300" />,
-  "Google Colab": <SiGooglecolab size={24} className="text-blue-300" />,
-  Roboflow: <TbBrain size={24} className="text-blue-300" />,
-  Git: <SiGit size={24} className="text-blue-300" />,
-  ".NET": <SiDotnet size={24} className="text-blue-300" />,
-  "Microsoft Access": <FaMicrosoft size={24} className="text-blue-300" />,
-  "Visual Studio": <DiVisualstudio size={24} className="text-blue-300" />,
-  JavaScript: <SiJavascript size={24} className="text-blue-300" />
-};
-
-
-const NavLink = ({ href, children, onClick }) => (
+// Memoized components to prevent unnecessary re-renders
+const NavLink = memo(({ href, children, onClick }) => (
   <a
     href={href}
     onClick={onClick}
@@ -166,9 +111,11 @@ const NavLink = ({ href, children, onClick }) => (
   >
     {children}
   </a>
-);
+));
 
-const MobileNav = ({ isOpen, setIsOpen }) => (
+NavLink.displayName = 'NavLink';
+
+const MobileNav = memo(({ isOpen, setIsOpen }) => (
   <div className={`
     fixed inset-0 bg-blue-950/95 backdrop-blur-lg transform transition-transform duration-300 z-50
     ${isOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -190,9 +137,11 @@ const MobileNav = ({ isOpen, setIsOpen }) => (
       ))}
     </div>
   </div>
-);
+));
 
-const Section = ({ id, title, children, bgColor = "bg-blue-800" }) => (
+MobileNav.displayName = 'MobileNav';
+
+const Section = memo(({ id, title, children, bgColor = "bg-blue-800" }) => (
   <section 
     id={id} 
     className={`py-8 md:py-16 ${bgColor} scroll-mt-16 relative overflow-hidden`}
@@ -206,36 +155,47 @@ const Section = ({ id, title, children, bgColor = "bg-blue-800" }) => (
       {children}
     </div>
   </section>
-);
+));
 
-const AutoScrollImages = ({ images }) => {
+Section.displayName = 'Section';
+
+// Optimized AutoScrollImages component with lazy loading and better scroll performance
+const AutoScrollImages = memo(({ images }) => {
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    const startScrolling = () => {
-      let scrollAmount = 0;
-      const scrollStep = 1; 
-      const scrollInterval = 20; 
+    let scrollAmount = 0;
+    let animationFrameId;
+    const totalWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    const startTime = performance.now();
+    const duration = 30000; // 30 seconds for a complete scroll
 
-      const scroll = setInterval(() => {
-        if (scrollContainer) {
-          scrollAmount += scrollStep;
-          scrollContainer.scrollLeft = scrollAmount;
-
-          
-          if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
-            scrollAmount = 0;
-          }
+    const scroll = (timestamp) => {
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      scrollAmount = progress * totalWidth;
+      
+      if (scrollContainer) {
+        scrollContainer.scrollLeft = scrollAmount;
+        
+        if (progress >= 1) {
+          // Reset the scroll position to start over
+          scrollAmount = 0;
+          startTime = performance.now();
         }
-      }, scrollInterval);
-
-      return () => clearInterval(scroll);
+      }
+      
+      animationFrameId = requestAnimationFrame(scroll);
     };
 
-    const stopScrolling = startScrolling();
-    return stopScrolling;
+    animationFrameId = requestAnimationFrame(scroll);
+    
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (
@@ -244,17 +204,22 @@ const AutoScrollImages = ({ images }) => {
       className="flex overflow-x-scroll scrollbar-hide h-48"
     >
       {images.map((image, idx) => (
-        <img
-          key={idx}
-          src={image}
-          alt={`Project Screenshot ${idx + 1}`}
-          className="h-full w-auto flex-shrink-0"
-        />
+        <div key={idx} className="h-full w-auto flex-shrink-0 relative">
+          <img
+            src={image}
+            alt={`Project Screenshot ${idx + 1}`}
+            className="h-full w-auto"
+            loading="lazy"
+          />
+        </div>
       ))}
     </div>
   );
-};
+});
 
+AutoScrollImages.displayName = 'AutoScrollImages';
+
+// Main Portfolio component with performance optimizations
 const Portfolio = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -263,27 +228,34 @@ const Portfolio = () => {
   const [showEmail, setShowEmail] = useState(false);
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
 
-
+  // Throttled scroll handler
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
+  // Handle body overflow when mobile menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
 
+  // Handle resume download
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
@@ -295,32 +267,132 @@ const Portfolio = () => {
       link.remove();
     } catch (error) {
       console.error("Error downloading resume:", error);
+    } finally {
+      setTimeout(() => setIsDownloading(false), 500);
     }
-    setIsDownloading(false);
   };
 
-  const handlePhoneClick = (e) => {
-    e.preventDefault();
-    setShowPhoneNumber(!showPhoneNumber);
-  };
+  // Memoized skills grid to prevent re-renders
+  const SkillsGrid = useMemo(() => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {portfolioData.skills.map((skill, index) => (
+        <div 
+          key={index} 
+          className="bg-white/10 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl 
+                   transition-all duration-300 hover:bg-white/20 hover:-translate-y-1 
+                   flex items-center gap-3 border border-white/20"
+        >
+          <IconsModule skill={skill} />
+          <span className="text-white">{skill}</span>
+        </div>
+      ))}
+    </div>
+  ), []);
+
+  // Memoized projects grid
+  const ProjectsGrid = useMemo(() => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {portfolioData.projects.map((project, index) => (
+        <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
+                                   overflow-hidden hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 md:p-6 space-y-4">
+            <h3 className="text-xl md:text-2xl font-bold text-white">{project.title}</h3>
+            <p className="text-blue-50 text-sm md:text-base">{project.description}</p>
+            <div className="flex flex-wrap gap-2">
+              {project.technologies.map((tech, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-blue-600/30 px-2 md:px-3 
+                                        py-1 md:py-2 rounded-full text-blue-100 text-sm">
+                  <IconsModule framework={tech} />
+                  <span>{tech}</span>
+                </div>
+              ))}
+            </div>
+            <ul className="space-y-2">
+              {project.highlights.map((highlight, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
+                  <p className="text-blue-50 text-sm md:text-base">{highlight}</p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <AutoScrollImages images={project.images} />
+        </Card>
+      ))}
+    </div>
+  ), []);
+
+  // Memoized experience section
+  const ExperienceSection = useMemo(() => (
+    <div className="space-y-8">
+      {portfolioData.experience.map((job, index) => (
+        <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
+                                   overflow-hidden hover:shadow-xl transition-all duration-300">
+          <CardContent className="p-4 md:p-6 space-y-4">
+            <h3 className="text-xl md:text-2xl font-bold text-white">{job.title}</h3>
+            <p className="text-blue-100 font-semibold">{job.company}</p>
+            <p className="text-blue-200 text-sm">{job.period} • {job.location}</p>
+            <ul className="space-y-2">
+              {job.responsibilities.map((responsibility, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
+                  <p className="text-blue-50 text-sm md:text-base">{responsibility}</p>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  ), []);
+
+  // Memoized certificates grid
+  const CertificatesGrid = useMemo(() => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {portfolioData.certificates.map((certificate, index) => (
+        <div 
+          key={index}
+          className="group relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg cursor-pointer 
+                   hover:shadow-xl transition-all duration-300"
+          onClick={() => setSelectedImage(certificate)}
+        >
+          <img
+            src={certificate}
+            alt={`Certificate ${index + 1}`}
+            className="w-full h-full object-cover transition-transform duration-300 
+                     group-hover:scale-105"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 
+                        transition-all duration-300 flex items-center justify-center">
+            <ZoomIn 
+              className="text-white opacity-0 group-hover:opacity-100 transition-opacity 
+                        duration-300" 
+              size={32}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ), []);
 
   return (
-    <div className="relative min-h-screen">   
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-950">   
-      <div className="absolute inset-0 backdrop-blur-[150px]" />           
-      <div className="absolute inset-0 bg-blue-900/10" />    
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-800/10 to-transparent animate-pulse" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-700/20 rounded-full blur-3xl animate-float opacity-50" />
-      <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-float-delayed opacity-50" />
-      <div className="absolute bottom-1/4 left-1/2 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-float-slow opacity-40" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,58,138,0.1),transparent_70%)]" />
-    </div>
+    <div className="relative min-h-screen">
+      {/* Background Elements - Reduced complexity for better performance */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-950">
+        <div className="absolute inset-0 backdrop-blur-[150px]" />
+        <div className="absolute inset-0 bg-blue-900/10" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-700/20 rounded-full blur-3xl animate-float opacity-50" />
+        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl animate-float-delayed opacity-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,58,138,0.1),transparent_70%)]" />
+      </div>
 
-    <div className="relative z-10">
-
-       {/* Mobile Navigation */}
-    <MobileNav isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
-    <nav className={`fixed w-full transition-all duration-300 z-50 ${
+      <div className="relative z-10">
+        {/* Mobile Navigation - Using memo to prevent re-renders */}
+        <MobileNav isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
+        
+        {/* Navigation Bar */}
+        <nav className={`fixed w-full transition-all duration-300 z-50 ${
           isScrolled ? "bg-blue-950/50 backdrop-blur-lg shadow-lg" : "bg-blue-900/30 backdrop-blur-md"
         }`}>
           <div className="max-w-6xl mx-auto px-4">
@@ -340,6 +412,7 @@ const Portfolio = () => {
               <button 
                 className="md:hidden text-white p-2"
                 onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open menu"
               >
                 <Menu size={24} />
               </button>
@@ -347,7 +420,7 @@ const Portfolio = () => {
           </div>
         </nav>
 
-         {/* About Section */}
+        {/* About Section */}
         <Section id="about" bgColor="bg-blue-950/20">
           <div className="min-h-screen flex flex-col items-center justify-center text-white space-y-6 px-4">
             <div className="relative">
@@ -355,6 +428,9 @@ const Portfolio = () => {
                 src="assets/mypicture.png"
                 alt={portfolioData.name}
                 className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-full border-4 border-blue-300 shadow-xl"
+                width={192}
+                height={192}
+                loading="eager"
               />
             </div>
 
@@ -379,6 +455,7 @@ const Portfolio = () => {
                 className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-blue-400 
                          text-white px-6 py-3 rounded-lg hover:bg-blue-300 transition-all 
                          duration-300 shadow-lg hover:shadow-blue-400/50"
+                aria-label="Download Resume"
               >
                 <Download size={20} />
                 {isDownloading ? "Downloading..." : "Download Resume"}
@@ -388,6 +465,7 @@ const Portfolio = () => {
                 className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-blue-300 
                          text-blue-900 px-6 py-3 rounded-lg hover:bg-blue-200 transition-all 
                          duration-300 shadow-lg hover:shadow-blue-300/50"
+                aria-label="Contact Me"
               >
                 <MapPin size={20} />
                 Contact Me
@@ -396,205 +474,125 @@ const Portfolio = () => {
           </div>
         </Section>
 
-        {/* Skills Section */}
+        {/* Skills Section - Using memoized components */}
         <Section id="skills" title="Skills & Technologies" bgColor="bg-blue-900/20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {portfolioData.skills.map((skill, index) => (
-              <div 
-                key={index} 
-                className="bg-white/10 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl 
-                         transition-all duration-300 hover:bg-white/20 hover:-translate-y-1 
-                         flex items-center gap-3 border border-white/20"
-              >
-                {skillIcons[skill] || null}
-                <span className="text-white">{skill}</span>
-              </div>
-            ))}
-          </div>
+          {SkillsGrid}
         </Section>
 
-        {/* Projects Section */}
+        {/* Projects Section - Using memoized grid */}
         <Section id="projects" title="Featured Projects" bgColor="bg-blue-950/20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {portfolioData.projects.map((project, index) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
-                                         overflow-hidden hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-4 md:p-6 space-y-4">
-                  <h3 className="text-xl md:text-2xl font-bold text-white">{project.title}</h3>
-                  <p className="text-blue-50 text-sm md:text-base">{project.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-blue-600/30 px-2 md:px-3 
-                                              py-1 md:py-2 rounded-full text-blue-100 text-sm">
-                        {frameworkIcons[tech] || null}
-                        <span>{tech}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <ul className="space-y-2">
-                    {project.highlights.map((highlight, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
-                        <p className="text-blue-50 text-sm md:text-base">{highlight}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <AutoScrollImages images={project.images} />
-              </Card>
-            ))}
-          </div>
+          {ProjectsGrid}
         </Section>
 
-        {/* Experience Section */}
+        {/* Experience Section - Using memoized content */}
         <Section id="experience" title="Work Experience" bgColor="bg-blue-900/20">
-          <div className="space-y-8">
-            {portfolioData.experience.map((job, index) => (
-              <Card key={index} className="bg-white/10 backdrop-blur-lg border border-white/20 
-                                         overflow-hidden hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-4 md:p-6 space-y-4">
-                  <h3 className="text-xl md:text-2xl font-bold text-white">{job.title}</h3>
-                  <p className="text-blue-100 font-semibold">{job.company}</p>
-                  <p className="text-blue-200 text-sm">{job.period} • {job.location}</p>
-                  <ul className="space-y-2">
-                    {job.responsibilities.map((responsibility, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-300"></div>
-                        <p className="text-blue-50 text-sm md:text-base">{responsibility}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {ExperienceSection}
         </Section>
 
-        {/* Trainings Section */}
+        {/* Trainings Section - Using memoized grid */}
         <Section id="trainings" title="Trainings & Certifications" bgColor="bg-blue-900/20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {portfolioData.certificates.map((certificate, index) => (
-              <div 
-                key={index}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg shadow-lg cursor-pointer 
-                         hover:shadow-xl transition-all duration-300"
-                onClick={() => setSelectedImage(certificate)}
-              >
-                <img
-                  src={certificate}
-                  alt={`Certificate ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-300 
-                           group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 
-                              transition-all duration-300 flex items-center justify-center">
-                  <ZoomIn 
-                    className="text-white opacity-0 group-hover:opacity-100 transition-opacity 
-                              duration-300" 
-                    size={32}
-                  />
+          {CertificatesGrid}
+        </Section>
+
+        {/* Contact Section */}
+        <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
+          <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
+            <CardContent className="p-4 md:p-8 space-y-8">
+              <p className="text-lg md:text-xl text-center text-white">
+                Feel free to reach out to me through my contact channels or social platforms!
+              </p>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Email */}
+                  <button
+                    onClick={() => {
+                      setShowPhoneNumber(false);
+                      setShowEmail((prev) => !prev);
+                      if (!showEmail) {
+                        navigator.clipboard.writeText(portfolioData.personalInfo.email);
+                      }
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                              transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                              text-sm md:text-base group"
+                    title="Email"
+                    aria-label="Copy Email Address"
+                  >
+                    <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span 
+                      className={`text-sm ${
+                        showEmail ? "break-words text-center px-2" : ""
+                      }`}
+                    >
+                      {showEmail ? portfolioData.personalInfo.email : "Email"}
+                    </span>
+                    {showEmail && (
+                      <span className="text-xs text-blue-300">Copied to clipboard</span>
+                    )}
+                  </button>
+                  
+                  {/* Phone */}
+                  <button
+                    onClick={() => {
+                      setShowEmail(false);
+                      setShowPhoneNumber((prev) => !prev);
+                      if (!showPhoneNumber) {
+                        navigator.clipboard.writeText(portfolioData.personalInfo.phone);
+                      }
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                              transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
+                              text-sm md:text-base group"
+                    title="Phone Number"
+                    aria-label="Copy Phone Number"
+                  >
+                    <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span 
+                      className={`text-sm ${
+                        showPhoneNumber ? "break-words text-center px-2" : ""
+                      }`}
+                    >
+                      {showPhoneNumber ? portfolioData.personalInfo.phone : "Phone"}
+                    </span>
+                    {showPhoneNumber && (
+                      <span className="text-xs text-blue-300">Copied to clipboard</span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <a
+                    href="https://github.com/Angelo12345678900"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                            transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base group"
+                    aria-label="GitHub Profile"
+                  >
+                    <Github size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">GitHub</span>
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/in/angelo-david-castuera-804300278/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
+                            transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
+                            text-sm md:text-base group"
+                    aria-label="LinkedIn Profile"
+                  >
+                    <Linkedin size={32} className="group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm">LinkedIn</span>
+                  </a>
                 </div>
               </div>
-            ))}
-          </div>
+            </CardContent>
+          </Card>
         </Section>
 
-       {/* Contact Section */}
-       <Section id="contact" title="Contact Me" bgColor="bg-blue-950/20">
-  <Card className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl w-full">
-    <CardContent className="p-4 md:p-8 space-y-8">
-      <p className="text-lg md:text-xl text-center text-white">
-        Feel free to reach out to me through my contact channels or social platforms!
-      </p>
-      
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Email */}
-          <button
-            onClick={() => {
-              setShowPhoneNumber(false); // Hide phone number if visible
-              setShowEmail((prev) => !prev); // Toggle email visibility
-              if (!showEmail) {
-                navigator.clipboard.writeText(portfolioData.personalInfo.email);
-              }
-            }}
-            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                      transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-                      text-sm md:text-base group"
-            title="Email"
-          >
-            <Mail size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span 
-              className={`text-sm ${
-                showEmail ? "break-words text-center px-2" : ""
-              }`}
-            >
-              {showEmail ? portfolioData.personalInfo.email : "Email"}
-            </span>
-            {showEmail && (
-              <span className="text-xs text-blue-300">Copied to clipboard</span>
-            )}
-          </button>
-          
-          {/* Phone */}
-          <button
-            onClick={() => {
-              setShowEmail(false); // Hide email if visible
-              setShowPhoneNumber((prev) => !prev); // Toggle phone visibility
-              if (!showPhoneNumber) {
-                navigator.clipboard.writeText(portfolioData.personalInfo.phone);
-              }
-            }}
-            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                      transition-colors p-4 bg-blue-600/30 rounded-lg hover:bg-blue-600/50
-                      text-sm md:text-base group"
-            title="Phone Number"
-          >
-            <Phone size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span 
-              className={`text-sm ${
-                showPhoneNumber ? "break-words text-center px-2" : ""
-              }`}
-            >
-              {showPhoneNumber ? portfolioData.personalInfo.phone : "Phone"}
-            </span>
-            {showPhoneNumber && (
-              <span className="text-xs text-blue-300">Copied to clipboard</span>
-            )}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <a
-            href="https://github.com/Angelo12345678900"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                    transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                    text-sm md:text-base group"
-          >
-            <Github size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">GitHub</span>
-          </a>
-          <a
-            href="https://www.linkedin.com/in/angelo-david-castuera-804300278/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center justify-center gap-2 text-blue-100 hover:text-white 
-                    transition-colors bg-blue-600/30 p-4 rounded-lg hover:bg-blue-600/50
-                    text-sm md:text-base group"
-          >
-            <Linkedin size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <span className="text-sm">LinkedIn</span>
-          </a>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-</Section>
-
-
-        {/* Image Modal */}
+        {/* Image Modal - Only rendered when needed */}
         {selectedImage && (
           <div 
             className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
@@ -610,6 +608,7 @@ const Portfolio = () => {
                 onClick={() => setSelectedImage(null)}
                 className="absolute -top-12 right-0 text-white hover:text-blue-300 
                          transition-colors duration-300"
+                aria-label="Close"
               >
                 Close
               </button>
